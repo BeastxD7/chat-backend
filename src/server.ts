@@ -14,6 +14,7 @@ const io = new Server(httpServer, {
   },
 });
 
+
 // Ensure environment variables are set
 const uri = process.env.MONGODB_URI;
 if (!uri) {
