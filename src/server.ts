@@ -3,23 +3,14 @@ import { createServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import { Collection, Document, MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
-import cors from 'cors';
 
 dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
-
-// Configure CORS to allow requests from specific origins
-app.use(cors({
-  origin: ['http://localhost:3000', 'https://langhub2.vercel.app'],
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type'],
-}));
-
 const io = new Server(httpServer, {
   cors: {
-    origin: ['http://localhost:3000', 'https://langhub2.vercel.app'],
+    origin: '*',
   },
 });
 
