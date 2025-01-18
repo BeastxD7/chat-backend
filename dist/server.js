@@ -22,7 +22,7 @@ const app = (0, express_1.default)();
 const httpServer = (0, http_1.createServer)(app);
 const io = new socket_io_1.Server(httpServer, {
     cors: {
-        origin: '*',
+        origin: ['https://langhub2.vercel.app', 'http://localhost:3000'],
         methods: ['GET', 'POST'],
     },
 });
@@ -52,6 +52,27 @@ function connectToDatabase() {
     });
 }
 connectToDatabase();
+// Add /health endpoint
+app.get('/health', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Check if MongoDB connection is alive
+        //@ts-ignore
+        if (!client || !client.isConnected()) {
+            return res.status(503).json({ status: 'fail', message: 'MongoDB not connected' });
+        }
+        // Optional: Check if collections are accessible
+        const dbStatus = messagesCollection && userColorsCollection ? 'available' : 'unavailable';
+        return res.status(200).json({
+            status: 'ok',
+            dbStatus,
+            message: 'Server is healthy',
+        });
+    }
+    catch (error) {
+        console.error('Health check error:', error);
+        res.status(500).json({ status: 'error', message: 'Internal server error' });
+    }
+}));
 io.on('connection', (socket) => {
     console.log('A user connected');
     if (!messagesCollection || !userColorsCollection) {
