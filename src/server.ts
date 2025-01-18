@@ -10,7 +10,7 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: '*',
+    origin: ['https://langhub2.vercel.app', 'http://localhost:3000'],
     methods: ['GET', 'POST'],
   },
 });
@@ -42,6 +42,29 @@ async function connectToDatabase() {
 }
 
 connectToDatabase();
+
+// Add /health endpoint
+app.get('/health', async (req, res) => {
+  try {
+    // Check if MongoDB connection is alive
+    //@ts-ignore
+    if (!client || !client.isConnected()) {
+      return res.status(503).json({ status: 'fail', message: 'MongoDB not connected' });
+    }
+
+    // Optional: Check if collections are accessible
+    const dbStatus = messagesCollection && userColorsCollection ? 'available' : 'unavailable';
+
+    return res.status(200).json({
+      status: 'ok',
+      dbStatus,
+      message: 'Server is healthy',
+    });
+  } catch (error) {
+    console.error('Health check error:', error);
+    res.status(500).json({ status: 'error', message: 'Internal server error' });
+  }
+});
 
 io.on('connection', (socket: Socket) => {
   console.log('A user connected');
@@ -97,7 +120,7 @@ io.on('connection', (socket: Socket) => {
     try {
       const { username, color } = data;
       console.log(`Setting color for ${username}: ${color}`);
-  
+
       // Save or update the user color in the database
       if (userColorsCollection) {
         await userColorsCollection.updateOne(
@@ -108,7 +131,7 @@ io.on('connection', (socket: Socket) => {
       } else {
         console.error('userColorsCollection is null');
       }
-  
+
       // Notify all clients about the updated color
       io.emit('update-user-color', { username, color });
     } catch (err) {
