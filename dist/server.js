@@ -55,16 +55,8 @@ connectToDatabase();
 // Add /health endpoint
 app.get('/health', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // Check if MongoDB connection is alive
-        //@ts-ignore
-        if (!client || !client.isConnected()) {
-            return res.status(503).json({ status: 'fail', message: 'MongoDB not connected' });
-        }
-        // Optional: Check if collections are accessible
-        const dbStatus = messagesCollection && userColorsCollection ? 'available' : 'unavailable';
         return res.status(200).json({
             status: 'ok',
-            dbStatus,
             message: 'Server is healthy',
         });
     }
